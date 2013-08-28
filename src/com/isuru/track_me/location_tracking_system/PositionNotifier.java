@@ -6,6 +6,8 @@ import android.os.IBinder;
 
 public class PositionNotifier extends Service{
 
+	private PositionManager positionMangaer=null;
+
 	@Override
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
@@ -16,6 +18,7 @@ public class PositionNotifier extends Service{
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+		positionMangaer = new PositionManager(this.getBaseContext());
 	}
 
 	
