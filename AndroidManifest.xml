@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.isuru.track_me"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.isuru.track_me.TrackMe"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.isuru.track_me.authentication_system.Authenticator"
+            android:label="@string/title_activity_authenticator"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.isuru.track_me.location_tracking_system.PositionNotifier"
+            android:exported="false"
+            android:label="Position Notifier" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.location_tracking_system.POSITIONNOTIFIER" />
+            </intent-filter>
+        </service>
+        
+        <service
+            android:name="com.isuru.track_me.location_tracking_system.GPSManager"
+            android:exported="false"
+            android:label="GPS Manager" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.location_tracking_system.GPSMANAGER" />
+            </intent-filter>
+        </service>
+        
+        <service
+            android:name="com.isuru.track_me.sms_handling_system.SMSManager"
+            android:exported="false"
+            android:label="SMS Manager" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.sms_handling_system.SMSMANAGER" />
+            </intent-filter>
+        </service>
+        
+        <receiver
+            android:name="com.isuru.track_me.sms_handling_system.SMSRecievedIdentifier"
+            android:enabled="true"
+            android:exported="true"
+            android:label="SMSRecievedIdentifier" >
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
