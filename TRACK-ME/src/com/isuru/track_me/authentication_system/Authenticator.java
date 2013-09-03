@@ -1,11 +1,13 @@
 package com.isuru.track_me.authentication_system;
 
 import com.isuru.track_me.R;
-
+import com.isuru.track_me.TrackMe;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,22 +24,20 @@ import android.widget.TextView;
  * well.
  */
 public class Authenticator extends Activity {
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] {
-			"foo@example.com:hello", "bar@example.com:world" };
-
+	
 	/**
 	 * The default email to populate the email field with.
 	 */
 	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
+//	private static final String TAG = "Authenticator";
+	
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
+
+	private String uNamePass;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -57,6 +57,7 @@ public class Authenticator extends Activity {
 		setContentView(R.layout.activity_authenticator);
 
 		// Set up the login form.
+
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
@@ -200,25 +201,57 @@ public class Authenticator extends Activity {
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
+			
+//			Log.v(TAG, "Authenticating");
 
-			try {
-				// Simulate network access.
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				return false;
-			}
+			SharedPreferences sPref = getPreferences(MODE_PRIVATE);
+			String encNamePass = sPref.getString("AuthData", "Empty");
 
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mEmail)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
+//			Log.v(TAG, "Access Encrypted Password");
+
+			if (encNamePass.equals("Empty")) {
+//				Log.v(TAG, "1) First Time");
+				uNamePass = mEmail.concat(":" + mPassword);
+//				Log.v(TAG, "2) First Time");
+				try {
+//					Log.v(TAG, "3) First Time");
+					encNamePass = SimpleCrypto.encrypt("gajk@390#6gf",
+							uNamePass);
+//					Log.v(TAG, "4) First Time");
+					SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString("AuthData", encNamePass);
+					editor.commit();
+					return true;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return false;
+				}
+			} else {
+//				Log.v(TAG, "1) Not First Time");
+
+				try {
+//					Log.v(TAG, "2) Not First Time");
+					uNamePass = SimpleCrypto.decrypt("gajk@390#6gf",
+							encNamePass);
+//					Log.v(TAG, "3) Not First Time");
+					String[] pieces = uNamePass.split(":");
+					if (pieces[0].equals(mEmail)) {
+						// Account exists, return true if the password matches.
+						return pieces[1].equals(mPassword);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+//					Log.v(TAG, "4) Not First Time");
+					e.printStackTrace();
+					return false;
 				}
 			}
 
-			// TODO: register the new account here.
-			return true;
+//			Log.v(TAG, "Exiting");
+
+			return false;
 		}
 
 		@Override
@@ -227,8 +260,13 @@ public class Authenticator extends Activity {
 			showProgress(false);
 
 			if (success) {
+				Intent intent = new Intent(getBaseContext(), TrackMe.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				getBaseContext().startActivity(intent);
 				finish();
 			} else {
+				mEmailView
+						.setError(getString(R.string.error_invalid_email));
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
