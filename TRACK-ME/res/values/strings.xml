@@ -8,5 +8,7 @@
     <string name="etPwd">Password</string>
     <string name="bLogin">Log In</string>
     <string name="tvGranted">Granted Permissions :</string>
+    <string name="title_activity_dialog">DialogActivity</string>
+    <string name="notificationTitle">TRACK-ME Permission Request</string>
 
 </resources>

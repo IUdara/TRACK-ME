@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-feature
@@ -22,6 +22,8 @@
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
+
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -68,6 +70,14 @@
                 <action android:name="com.isuru.track_me.sms_handling_system.SMSMANAGER" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.isuru.track_me.permission_handling_system.PermissionManager"
+            android:exported="false"
+            android:label="Permission Manager" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.permission_handling_system.PermissionManager" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name="com.isuru.track_me.sms_handling_system.SMSRecievedIdentifier"
@@ -78,6 +88,11 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name="com.isuru.track_me.permission_handling_system.DialogActivity"
+            android:label="@string/title_activity_dialog" >
+        </activity>
     </application>
 
 </manifest>

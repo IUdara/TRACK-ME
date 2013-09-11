@@ -1,5 +1,7 @@
 package com.isuru.track_me.sms_handling_system;
 
+import com.isuru.track_me.permission_handling_system.PermissionManager;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +27,7 @@ public class SMSRecievedIdentifier extends BroadcastReceiver {
 			messageBody = "";
 			
 			Bundle bundle = intent.getExtras();
-			Intent serviceIntent = new Intent(context, SMSManager.class);
+			Intent serviceIntent = new Intent(context, PermissionManager.class);
 
 			if (bundle != null) {
 				Object[] pdus = (Object[]) bundle.get("pdus");

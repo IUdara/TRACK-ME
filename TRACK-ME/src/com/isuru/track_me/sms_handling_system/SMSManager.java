@@ -33,10 +33,10 @@ public class SMSManager extends Service {
 		
 		String message, phoneNo;
 		if (intent.getStringExtra("message") != null) {
-			message = intent.getStringExtra("message");
+			message = intent.getStringExtra("message").trim();
 			phoneNo = intent.getStringExtra("sender");
 
-			if (message.contains("Track")) {
+			if (message.startsWith("Track")) {
 				Log.v(TAG, "Tracking message received");
 				
 				Intent serviceIntent = new Intent(getBaseContext(),
@@ -45,8 +45,8 @@ public class SMSManager extends Service {
 				serviceIntent.putExtra("sender", phoneNo);
 				serviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				getBaseContext().startService(serviceIntent);
-			} else if (message.contains("Permission")) {
-
+			} else if (message.startsWith("Permission:")) {
+				Log.v(TAG, "Permission message received");
 			}
 		}
 
