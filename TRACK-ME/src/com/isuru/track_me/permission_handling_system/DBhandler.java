@@ -1,35 +1,20 @@
 package com.isuru.track_me.permission_handling_system;
 
-import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.PeriodFormatter;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.IBinder;
 import android.util.Log;
 
 public class DBhandler {
-	// private static DBhandler instance = null;
-
-	// protected DBhandler() {
-	// // Exists only to defeat instantiation.
-	// }
-
-	// public static DBhandler getInstance(Context c) {
-	// if (instance == null) {
-	// instance = new DBhandler(c);
-	// }
-	// return instance;
-	// }
 	private static final String TAG = "DBhandler";
 
 	private static final String DATABASE_NAME = "PermissionDB";
@@ -97,20 +82,6 @@ public class DBhandler {
 		permissionDBHelper.close();
 	}
 
-	// public long makepermissionEntry(String permCode, String phoneNo,
-	// String begin, String end, String destination, String period)
-	// throws SQLException {
-	// // TODO Auto-generated method stub
-	// ContentValues tableData = new ContentValues();
-	// tableData.put(KEY_PERMKEY, permCode);
-	// tableData.put(KEY_PHONE, phoneNo);
-	// tableData.put(KEY_BEGT, begin);
-	// tableData.put(KEY_ENDT, begin);
-	// tableData.put(KEY_DEST, destination);
-	// tableData.put(KEY_PERIOD, period);
-	// return permissionSQLDB.insert(TABLE_NAME, null, tableData);
-	// }
-
 	public long makepermissionEntry(Permission permission) throws SQLException {
 		// TODO Auto-generated method stub
 		DateTimeFormatter dtFormat = DateTimeFormat
@@ -127,88 +98,33 @@ public class DBhandler {
 		return permissionSQLDB.insert(TABLE_NAME, null, tableData);
 	}
 
-	// public String getData() {
-	// // TODO Auto-generated method stub
-	// String[] tabCols = new String[] { KEY_ROWID, KEY_PERMKEY, KEY_PHONE,
-	// KEY_BEGT, KEY_ENDT };
-	// Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabCols, null, null,
-	// null, null, null);
-	// String resultData = "";
-	//
-	// int iRow = dbPos.getColumnIndex(KEY_ROWID);
-	// int iPermCode = dbPos.getColumnIndex(KEY_PERMKEY);
-	// int iPone = dbPos.getColumnIndex(KEY_PHONE);
-	// int iBeginT = dbPos.getColumnIndex(KEY_BEGT);
-	// int iEndT = dbPos.getColumnIndex(KEY_BEGT);
-	//
-	// for (dbPos.moveToFirst(); !dbPos.isAfterLast(); dbPos.moveToNext()) {
-	// resultData = resultData + dbPos.getString(iRow) + "\t\t\t"
-	// + dbPos.getString(iName) + "\t\t\t"
-	// + dbPos.getString(iRating) + "\n";
-	// }
-	//
-	// return resultData;
-	// }
+	public ArrayList<String> getData() {
+		// TODO Auto-generated method stub
+		String[] tabCols = new String[] { KEY_ROWID, KEY_PERMKEY, KEY_PHONE,
+				KEY_BEGT, KEY_ENDT };
+		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabCols, null, null,
+				null, null, null);
+		ArrayList<String> permissionList = new ArrayList<String>();
 
-	// public String getData() {
-	// // TODO Auto-generated method stub
-	// String[] tabCols = new String[] { KEY_ROWID, KEY_PERMKEY, KEY_PHONE,
-	// KEY_BEGT, KEY_ENDT };
-	// Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabCols, null, null,
-	// null, null, null);
-	// String resultData = "";
-	//
-	// int iRow = dbPos.getColumnIndex(KEY_ROWID);
-	// int iPermCode = dbPos.getColumnIndex(KEY_PERMKEY);
-	// int iPone = dbPos.getColumnIndex(KEY_PHONE);
-	// int iBeginT = dbPos.getColumnIndex(KEY_BEGT);
-	// int iEndT = dbPos.getColumnIndex(KEY_BEGT);
-	//
-	// for (dbPos.moveToFirst(); !dbPos.isAfterLast(); dbPos.moveToNext()) {
-	// resultData = resultData + dbPos.getString(iRow) + "\t\t\t"
-	// + dbPos.getString(iName) + "\t\t\t"
-	// + dbPos.getString(iRating) + "\n";
-	// }
-	//
-	// return resultData;
-	// }
+		// int iRow = dbPos.getColumnIndex(KEY_ROWID);
+		// int iPermCode = dbPos.getColumnIndex(KEY_PERMKEY);
+		int iPone = dbPos.getColumnIndex(KEY_PHONE);
+		int iBeginT = dbPos.getColumnIndex(KEY_BEGT);
+		int iEndT = dbPos.getColumnIndex(KEY_ENDT);
 
-	// public String getRating(int rowID) throws SQLException {
-	// // TODO Auto-generated method stub
-	// String[] tabRating = new String[] { KEY_BEGT };
-	// Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabRating, KEY_ROWID
-	// + "=" + rowID, null, null, null, null, null);
-	// if (dbPos != null) {
-	// dbPos.moveToFirst();
-	// String resultRating = dbPos.getString(dbPos
-	// .getColumnIndex(KEY_BEGT));
-	// return resultRating;
-	// }
-	//
-	// return null;
-	// }
+		for (dbPos.moveToFirst(); !dbPos.isAfterLast(); dbPos.moveToNext()) {
+			String resultData = "";
+			resultData = resultData + dbPos.getString(iPone) + " "
+					+ dbPos.getString(iBeginT) + " " + dbPos.getString(iEndT);
+			permissionList.add(resultData);
+		}
 
-	// public String getName(int rowID) throws SQLException {
-	// // TODO Auto-generated method stub
-	// String[] tabName = new String[] { KEY_PHONE };
-	// Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabName, KEY_ROWID
-	// + "=" + rowID, null, null, null, null, null);
-	// if (dbPos != null) {
-	// dbPos.moveToFirst();
-	// String resultName = dbPos
-	// .getString(dbPos.getColumnIndex(KEY_PHONE));
-	// return resultName;
-	// }
-	//
-	// return null;
-	// }
+		return permissionList;
+	}
 
 	public String[] getPermissionData(String permCode, String phoneNo)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		String[] tabName = new String[] { KEY_BEGT, KEY_ENDT };
-
-		// KEY_PERMKEY + "=" + permCode + " AND " + KEY_PHONE + "=" + phoneNo
 
 		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabName, KEY_PERMKEY
 				+ "=" + permCode + " AND " + KEY_PHONE + "=" + phoneNo, null,
@@ -232,13 +148,13 @@ public class DBhandler {
 		DateTime start, end;
 		Interval interval;
 		Boolean canTrack = false;
-		
-		DateTimeFormatter dtFormat = DateTimeFormat
-		.forPattern("yyyy-MM-dd HH:mm");
 
-//		String mocking = "2013-09-11 13:00";
-//		DateTime mockDT = DateTime.parse(mocking, dtFormat);
-//		Log.v(TAG, "Mock Date " + mockDT.toString(dtFormat));
+		DateTimeFormatter dtFormat = DateTimeFormat
+				.forPattern("yyyy-MM-dd HH:mm");
+
+		// String mocking = "2013-09-11 13:00";
+		// DateTime mockDT = DateTime.parse(mocking, dtFormat);
+		// Log.v(TAG, "Mock Date " + mockDT.toString(dtFormat));
 
 		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabName, KEY_PERMKEY
 				+ "=? AND " + KEY_PHONE + "=?", new String[] { permCode,
@@ -264,7 +180,6 @@ public class DBhandler {
 
 	public void editEntry(int rowEditID, String editName, String editRate)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, null, KEY_ROWID + "="
 				+ rowEditID, null, null, null, null, null);
 		if (dbPos != null && dbPos.getCount() > 0) {
