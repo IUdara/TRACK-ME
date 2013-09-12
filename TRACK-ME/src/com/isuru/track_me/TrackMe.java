@@ -1,5 +1,10 @@
 package com.isuru.track_me;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import java.util.ArrayList;
 
 import com.isuru.track_me.R;
@@ -26,9 +31,7 @@ public class TrackMe extends Activity {
 		setContentView(R.layout.activity_main);
 
 		permList = (ListView) findViewById(R.id.lV);
-
-		// final ArrayAdapter<String> adapter = new ArrayAdapter(this,
-		// android.R.layout.simple_list_item_1, this.generateList());
+		
 		permList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item,
 				this.generateList()));
 	}
@@ -40,6 +43,7 @@ public class TrackMe extends Activity {
 		return true;
 	}
 
+	// Generate list of items to view in ListView
 	private ArrayList<String> generateList() {
 		DBhandler permissionHandler = new DBhandler(this);
 		permissionHandler.open();
@@ -60,7 +64,8 @@ public class TrackMe extends Activity {
 		return null;
 	}
 
-	public String getContactName(Context context, String phoneNumber) {
+	// Get contact name from the contacts of phone for a given phone number
+	private String getContactName(Context context, String phoneNumber) {
 		ContentResolver cr = context.getContentResolver();
 		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
 				Uri.encode(phoneNumber));
@@ -73,6 +78,7 @@ public class TrackMe extends Activity {
 		if (cursor.moveToFirst()) {
 			contactName = cursor.getString(cursor
 					.getColumnIndex(PhoneLookup.DISPLAY_NAME));
+			cursor.close();
 		}
 
 		if (cursor != null && !cursor.isClosed()) {

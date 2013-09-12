@@ -1,5 +1,10 @@
 package com.isuru.track_me.permission_handling_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 //DateTime(int year, int monthOfYear, int dayOfMonth, int hourOfDay, int minuteOfHour)
 //Constructs an instance from datetime field values using ISOChronology in the default time zone.
 
@@ -20,9 +25,8 @@ public class Permission {
 	public Permission(int[][] dateTime, String owner) {
 		super();
 		this.permissionStart = new DateTime(dateTime[0][0], dateTime[0][1],
-				dateTime[0][2], dateTime[1][0], dateTime[1][1]); // use sting
-																	// arrays as
-																	// input.
+				dateTime[0][2], dateTime[1][0], dateTime[1][1]); 
+		
 		// construct new DataTime using new
 		this.permissionEnd = new DateTime(dateTime[2][0], dateTime[2][1],
 				dateTime[2][2], dateTime[3][0], dateTime[3][1]);

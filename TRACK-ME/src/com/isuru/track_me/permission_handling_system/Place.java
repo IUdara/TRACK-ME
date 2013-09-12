@@ -1,5 +1,10 @@
 package com.isuru.track_me.permission_handling_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 public class Place {
 	
 	private String longitude;

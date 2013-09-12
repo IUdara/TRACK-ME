@@ -6,18 +6,6 @@ import android.util.Log;
 public class SMSSender {
 	
 	private static final String TAG = "SMSSender";
-//	private static SMSSender ms;
-//
-//	private SMSSender() {
-//
-//	}
-//
-//	public static SMSSender getMS() {
-//		if (ms == null) {
-//			ms = new SMSSender();
-//		}
-//		return ms;
-//	}
 
 	public SMSSender() {
 		// TODO Auto-generated constructor stub

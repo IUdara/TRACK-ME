@@ -1,5 +1,10 @@
 package com.isuru.track_me.permission_handling_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import com.isuru.track_me.R;
 import com.isuru.track_me.permission_handling_system.PermissionManager.LocalBinder;
 import com.isuru.track_me.sms_handling_system.SMSSender;
@@ -16,6 +21,11 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.widget.Toast;
+
+/*
+ * This activity will be start on selecting notification prompted by permission request SMS
+ * This activity is bounded with the PermissionManager service
+ */
 
 public class DialogActivity extends Activity {
 
@@ -39,16 +49,42 @@ public class DialogActivity extends Activity {
 		return true;
 	}
 
-	public void showDialog() {
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.v(TAG, "Starting");
+		Intent mIntent = new Intent(this, PermissionManager.class);
+		bindService(mIntent, mConnection, BIND_AUTO_CREATE);
+		Log.v(TAG, "Bound");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (mBounded) {
+			permissionManager.stopSelf(); // destroy bounded service
+			unbindService(mConnection);
+			mBounded = false;
+		}
+	}
+
+	// Prompting a dialog with requested permission details and options to grant
+	// or reject permission
+	private void showDialog() {
 		Log.v(TAG, "Trying to get message");
+
 		if (permissionManager != null) {
 			message = permissionManager.getPromptingMessage();
 			Log.v(TAG, "Got message " + message);
 		}
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(
 				new ContextThemeWrapper(this, android.R.style.Theme_Dialog));
-		if (message != null)
+
+		if (message != null) {
 			builder.setTitle("TRACK-ME Permission Request");
+		}
+
 		builder.setMessage(message);
 		builder.setPositiveButton("Accept",
 				new DialogInterface.OnClickListener() {
@@ -67,16 +103,28 @@ public class DialogActivity extends Activity {
 		builder.show();
 	}
 
-	@Override
-	protected void onStart() {
-		// TODO Auto-generated method stub
-		super.onStart();
-		Log.v(TAG, "Starting");
-		Intent mIntent = new Intent(this, PermissionManager.class);
-		bindService(mIntent, mConnection, BIND_AUTO_CREATE);
-		Log.v(TAG, "Bound");
+	// If permission granted add those permissions to the database and send the
+	// permission requester an SMS with code needs to sent to track the location
+	private void requestAccepted() {
+		SMSSender smsSender = new SMSSender();
+		DBhandler permissionHandler = new DBhandler(this);
+		RandomGenerator randomGenerator = new RandomGenerator(5); // code with 5
+																	// characters
+		String requestor = permissionManager.getPhoneNo();
+		String permissionCode = randomGenerator.nextString(); // get the code
+		permissionManager.setPermissionCode(permissionCode);
+
+		permissionHandler.open();
+		// add permission to DB
+		permissionHandler
+				.makepermissionEntry(permissionManager.getPermission());
+		permissionHandler.close();
+		String reply = "Permission Accepted. Send 'Track: " + permissionCode
+				+ "' to track.";
+		smsSender.sendSMS(requestor, reply);
 	}
 
+	// Binding the activity with the PermissionManager service
 	ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceDisconnected(ComponentName name) {
@@ -92,38 +140,16 @@ public class DialogActivity extends Activity {
 			Toast.makeText(DialogActivity.this, "Service is connected",
 					Toast.LENGTH_LONG).show();
 			mBounded = true;
+
 			LocalBinder mLocalBinder = (LocalBinder) service;
 			permissionManager = mLocalBinder.getServerInstance();
+
+			// Retrieve permission details from the service
 			message = permissionManager.getPromptingMessage();
 			Log.v(TAG, "Got message " + message);
 			DialogActivity.this.showDialog();
 		}
 
 	};
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		if (mBounded) {
-			permissionManager.stopSelf();
-			unbindService(mConnection);
-			mBounded = false;
-		}
-	}
-
-	public void requestAccepted() {
-		SMSSender smsSender = new SMSSender();
-		DBhandler permissionHandler = new DBhandler(this);
-		RandomGenerator randomGenerator = new RandomGenerator(5);
-		String requestor = permissionManager.getPhoneNo();
-		String permissionCode = randomGenerator.nextString();
-		permissionManager.setPermissionCode(permissionCode);
-		permissionHandler.open();
-		permissionHandler.makepermissionEntry(permissionManager.getPermission());
-		permissionHandler.close();
-		String reply = "Permission Accepted. Send 'Track: " + permissionCode
-				+ "' to track.";
-		smsSender.sendSMS(requestor, reply);
-	}
 
 }

@@ -1,5 +1,10 @@
 package com.isuru.track_me.location_tracking_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +49,10 @@ public class PositionNotifier extends Service {
 
 			final String receiver = intent.getStringExtra("sender");
 
+			// LocationResult is used as a call-back class to pass location
+			// value
+			// from MyLocation to user code. LocationResult is an abstract
+			// class.
 			LocationResult locationResult = new LocationResult(receiver) {
 				@Override
 				public void gotLocation(Location location) {
@@ -55,6 +64,8 @@ public class PositionNotifier extends Service {
 						double longitude = location.getLongitude();
 
 						String locationName = "";
+
+						// Geo-code for the location (latitude + longitude)
 						Geocoder gcd = new Geocoder(getBaseContext(),
 								Locale.getDefault());
 						List<Address> addresses;
@@ -78,6 +89,7 @@ public class PositionNotifier extends Service {
 							e.printStackTrace();
 						}
 
+						// Formatting to send via an SMS
 						currentLocation = "Latitude : " + latitude
 								+ "\nLonitude : " + longitude + "\nCity : "
 								+ locationName;
@@ -91,6 +103,8 @@ public class PositionNotifier extends Service {
 			};
 			MyLocation myLocation = new MyLocation();
 			Log.v(TAG, "Pending location");
+			// Where the location information actually assigned to
+			// locationResult
 			myLocation.getLocation(getBaseContext(), locationResult);
 			Log.v(TAG, "Location OK");
 		}

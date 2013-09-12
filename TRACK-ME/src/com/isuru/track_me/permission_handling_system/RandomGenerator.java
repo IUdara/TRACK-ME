@@ -2,6 +2,14 @@ package com.isuru.track_me.permission_handling_system;
 
 import java.util.Random;
 
+/**
+ * @Author : Erickson
+ */
+
+/*
+ * This class generates a random String which will be sent as the permission approval keyword
+ */
+
 public class RandomGenerator {
 
 	private static final char[] symbols = new char[36];
@@ -30,3 +38,7 @@ public class RandomGenerator {
 	}
 
 }
+
+/*
+ * Referenced : http://stackoverflow.com/questions/41107/how-to-generate-a-random-alpha-numeric-string
+ */

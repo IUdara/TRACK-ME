@@ -1,6 +1,10 @@
 package com.isuru.track_me.permission_handling_system;
 
-import java.text.SimpleDateFormat;
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import java.util.Calendar;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -8,7 +12,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.isuru.track_me.location_tracking_system.PositionNotifier;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,7 +27,6 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 import android.widget.Toast;
 
-@SuppressLint("SimpleDateFormat")
 public class PermissionManager extends Service {
 
 	private Permission permission;
@@ -50,26 +52,24 @@ public class PermissionManager extends Service {
 			message = intent.getStringExtra("message").trim();
 			phoneNo = intent.getStringExtra("sender");
 
-			if (message.startsWith("Track:")) {
+			if (message.startsWith("Track:")) { // a tracking request
 				Log.v(TAG, "Tracking message received");
 				message = message.replace("Track: ", "");
 				if (message != null && message.length() == 5) {
 					Log.v(TAG, "Tracking message OK");
-					Calendar calendar = Calendar.getInstance();
-					SimpleDateFormat cFormat = new SimpleDateFormat(
-							"yyyy-MM-dd HH:mm");
-					;
-					String formattedDate = cFormat.format(calendar.getTime());
-					DateTime curentT = new DateTime(calendar.getTime());
-					Log.v(TAG, "Current Date Time : " + formattedDate);
+					DateTime curentT = this.getCurrentDate(); // get current
+																// DateTime
+
 					DBhandler permissionHandler = new DBhandler(this);
 					permissionHandler.open();
+					// check whether requester has tracking permission
 					Boolean isPermitted = permissionHandler
 							.checkTrackingValidity(message, phoneNo, curentT);
 					permissionHandler.close();
 
-					if (isPermitted) {
+					if (isPermitted) { // when he has permission
 						Log.v(TAG, "You can track");
+						// start PositionNotifier service
 						Intent serviceIntent = new Intent(getBaseContext(),
 								PositionNotifier.class);
 						serviceIntent.putExtra("sender", phoneNo);
@@ -84,14 +84,19 @@ public class PermissionManager extends Service {
 				this.stopSelf();
 
 				return Service.START_STICKY;
-			} else if (message.startsWith("Permission:")) {
+
+			} else if (message.startsWith("Permission:")) { // a permission
+															// request
 				Log.v(TAG, "Permission message received");
 				message = message.replace("Permission: ", "");
+				// extract requested permissions into a Permission object
 				permission = extractPermission(message, phoneNo);
 				Log.v(TAG, "Permission established");
 				String requester = this.getContactName(getBaseContext(),
-						phoneNo);
+						phoneNo); // get requester's contact name from phone's
+									// contacts
 				Log.v(TAG, "Contact Received");
+				// format requested permissions to display
 				DateTimeFormatter format = DateTimeFormat
 						.forPattern("yyyy-MM-dd hh:mm aa");
 				promptingMessage = requester
@@ -100,7 +105,8 @@ public class PermissionManager extends Service {
 						+ " to "
 						+ permission.getPermissionEnd().toString(format);
 				Log.v(TAG, "Message Created");
-				this.launchNotification(promptingMessage);
+				this.launchNotification(promptingMessage); // launching
+															// notification
 				Log.v(TAG, "Message Prompted");
 			}
 		}
@@ -124,6 +130,7 @@ public class PermissionManager extends Service {
 				Toast.LENGTH_LONG).show();
 	}
 
+	// extract requested permissions into a Permission object
 	private Permission extractPermission(String message, String sender) {
 		String[] permissionList = message.split(" ");
 		String[][] timeDetails = new String[4][3];
@@ -146,20 +153,14 @@ public class PermissionManager extends Service {
 		return permission;
 	}
 
-	public Boolean checkTrackingPermission(String message, String sender) {
-		return null;
+	// return current DateTime
+	private DateTime getCurrentDate() {
+		Calendar calendar = Calendar.getInstance();
+		DateTime currentT = new DateTime(calendar.getTime());
+		return currentT;
 	}
 
-	public Boolean savePermission(Permission permission) {
-		return null;
-
-	}
-
-	public Permission retrievePermission() {
-		return null;
-
-	}
-
+	// Launching the notification
 	@SuppressWarnings("deprecation")
 	private void launchNotification(String message) {
 		Context context = getApplicationContext();
@@ -184,6 +185,7 @@ public class PermissionManager extends Service {
 		notificationManager.notify(0, notification);
 	}
 
+	// Get contact name for a phone no from phone's contacts
 	private String getContactName(Context context, String phoneNumber) {
 		ContentResolver cr = context.getContentResolver();
 		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
@@ -206,6 +208,7 @@ public class PermissionManager extends Service {
 		return contactName;
 	}
 
+	// Use for bind this service with DialogActivity
 	public class LocalBinder extends Binder {
 		public PermissionManager getServerInstance() {
 			return PermissionManager.this;

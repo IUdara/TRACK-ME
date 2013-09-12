@@ -1,5 +1,10 @@
 package com.isuru.track_me.permission_handling_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import java.util.ArrayList;
 
 import org.joda.time.DateTime;
@@ -99,7 +104,6 @@ public class DBhandler {
 	}
 
 	public ArrayList<String> getData() {
-		// TODO Auto-generated method stub
 		String[] tabCols = new String[] { KEY_ROWID, KEY_PERMKEY, KEY_PHONE,
 				KEY_BEGT, KEY_ENDT };
 		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabCols, null, null,

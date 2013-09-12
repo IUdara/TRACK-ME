@@ -6,6 +6,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
+ * @Author : Ferenc Hechler
+ */
+
+/*
+ * Use to encrypt and decrypt username and password
+ */
+
+/**
  * Usage:
  * 
  * <pre>
@@ -14,8 +22,8 @@ import javax.crypto.spec.SecretKeySpec;
  * String cleartext = SimpleCrypto.decrypt(masterpassword, crypto)
  * </pre>
  * 
- * @author ferenc.hechler
  */
+
 public class SimpleCrypto {
 
 	public static String encrypt(String seed, String cleartext)
@@ -34,13 +42,6 @@ public class SimpleCrypto {
 	}
 
 	private static byte[] getRawKey(byte[] seed) throws Exception {
-		// KeyGenerator kgen = KeyGenerator.getInstance("AES");
-		// SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-		// sr.setSeed(seed);
-		// kgen.init(128, sr); // 192 and 256 bits may not be available
-		// SecretKey skey = kgen.generateKey();
-		// byte[] raw = skey.getEncoded();
-		// return raw;
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte[] md5Bytes = md.digest(seed); // 128 Bit = 16 byte SecretKey
 		SecretKey skey = new SecretKeySpec(md5Bytes, "AES");
@@ -99,3 +100,7 @@ public class SimpleCrypto {
 	}
 
 }
+
+/*
+ * Referenced : http://libpfb.so/tmc/code-source/
+ */

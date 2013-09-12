@@ -1,5 +1,10 @@
 package com.isuru.track_me.location_tracking_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import java.util.Timer;
 import java.util.TimerTask;
 import android.content.Context;
@@ -17,8 +22,7 @@ public class MyLocation {
 	boolean network_enabled = false;
 
 	public boolean getLocation(Context context, LocationResult result) {
-		// I use LocationResult callback class to pass location value from
-		// MyLocation to user code.
+		// Get location information using a TimerTask
 		locationResult = result;
 		if (lm == null)
 			lm = (LocationManager) context
@@ -39,17 +43,19 @@ public class MyLocation {
 		if (!gps_enabled && !network_enabled)
 			return false;
 
+		// requesting for location updates
 		if (gps_enabled)
 			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 1,
 					locationListenerGps);
 		if (network_enabled)
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1,
-					locationListenerNetwork);
+			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000,
+					1, locationListenerNetwork);
 		timer1 = new Timer();
 		timer1.schedule(new GetLastLocation(), 20000);
 		return true;
 	}
 
+	// Define LocationListener to update location information via GPS
 	LocationListener locationListenerGps = new LocationListener() {
 		public void onLocationChanged(Location location) {
 			timer1.cancel();
@@ -68,6 +74,7 @@ public class MyLocation {
 		}
 	};
 
+	// Define LocationListener to update location information via network
 	LocationListener locationListenerNetwork = new LocationListener() {
 		public void onLocationChanged(Location location) {
 			timer1.cancel();
@@ -86,6 +93,8 @@ public class MyLocation {
 		}
 	};
 
+	// GetLastLocation task which will be started after 20000 mils, after
+	// stabilize GPS position via a provider
 	class GetLastLocation extends TimerTask {
 		@Override
 		public void run() {
@@ -93,11 +102,13 @@ public class MyLocation {
 			lm.removeUpdates(locationListenerNetwork);
 
 			Location net_loc = null, gps_loc = null;
+			// get location through GPS
 			if (gps_enabled) {
 				gps_loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 				Log.v("isGPSEnabled", "=" + gps_enabled);
 			}
 
+			// get location through Network
 			if (network_enabled) {
 				net_loc = lm
 						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -125,6 +136,8 @@ public class MyLocation {
 		}
 	}
 
+	// LocationResult is used as a call-back class to pass location value from
+	// MyLocation to user code.
 	public static abstract class LocationResult {
 
 		@SuppressWarnings("unused")

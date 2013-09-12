@@ -1,5 +1,10 @@
 package com.isuru.track_me.authentication_system;
 
+/**
+ * @Author : Isuru Jayaweera
+ * @email  : jayaweera.10@cse.mrt.ac.lk
+ */
+
 import com.isuru.track_me.R;
 import com.isuru.track_me.TrackMe;
 import android.animation.Animator;
@@ -21,17 +26,19 @@ import android.widget.TextView;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
- * well.
+ * well. A user needs to be singed up at the first launch of this activity and
+ * after singed up he only can sign in
  */
+
 public class Authenticator extends Activity {
-	
+
 	/**
 	 * The default email to populate the email field with.
 	 */
 	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
-//	private static final String TAG = "Authenticator";
-	
+	// private static final String TAG = "Authenticator";
+
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
@@ -201,55 +208,50 @@ public class Authenticator extends Activity {
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			
-//			Log.v(TAG, "Authenticating");
+
+			// Log.v(TAG, "Authenticating");
 
 			SharedPreferences sPref = getPreferences(MODE_PRIVATE);
 			String encNamePass = sPref.getString("AuthData", "Empty");
 
-//			Log.v(TAG, "Access Encrypted Password");
+			// Log.v(TAG, "Access Encrypted Password");
 
 			if (encNamePass.equals("Empty")) {
-//				Log.v(TAG, "1) First Time");
+				// Log.v(TAG, "1) First Time");
 				uNamePass = mEmail.concat(":" + mPassword);
-//				Log.v(TAG, "2) First Time");
+				// Log.v(TAG, "2) First Time");
 				try {
-//					Log.v(TAG, "3) First Time");
+					// Log.v(TAG, "3) First Time");
 					encNamePass = SimpleCrypto.encrypt("gajk@390#6gf",
 							uNamePass);
-//					Log.v(TAG, "4) First Time");
+					// Log.v(TAG, "4) First Time");
 					SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString("AuthData", encNamePass);
 					editor.commit();
 					return true;
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return false;
 				}
 			} else {
-//				Log.v(TAG, "1) Not First Time");
+				// Log.v(TAG, "Not First Time");
 
 				try {
-//					Log.v(TAG, "2) Not First Time");
 					uNamePass = SimpleCrypto.decrypt("gajk@390#6gf",
 							encNamePass);
-//					Log.v(TAG, "3) Not First Time");
 					String[] pieces = uNamePass.split(":");
 					if (pieces[0].equals(mEmail)) {
 						// Account exists, return true if the password matches.
 						return pieces[1].equals(mPassword);
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-//					Log.v(TAG, "4) Not First Time");
 					e.printStackTrace();
 					return false;
 				}
 			}
 
-//			Log.v(TAG, "Exiting");
+			// Log.v(TAG, "Exiting");
 
 			return false;
 		}
@@ -265,8 +267,7 @@ public class Authenticator extends Activity {
 				getBaseContext().startActivity(intent);
 				finish();
 			} else {
-				mEmailView
-						.setError(getString(R.string.error_invalid_email));
+				mEmailView.setError(getString(R.string.error_invalid_email));
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
