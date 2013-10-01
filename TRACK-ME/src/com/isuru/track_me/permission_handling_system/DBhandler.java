@@ -84,6 +84,9 @@ public class DBhandler {
 	}
 
 	public void close() {
+		if (permissionSQLDB != null) {
+			permissionSQLDB.close();
+		}
 		permissionDBHelper.close();
 	}
 
@@ -92,6 +95,9 @@ public class DBhandler {
 		DateTimeFormatter dtFormat = DateTimeFormat
 				.forPattern("yyyy-MM-dd HH:mm");
 		ContentValues tableData = new ContentValues();
+
+		// this.updateIDs();
+
 		tableData.put(KEY_PERMKEY, permission.getPermissionCode());
 		tableData.put(KEY_PHONE, permission.getOwner());
 		tableData.put(KEY_BEGT,
@@ -104,23 +110,37 @@ public class DBhandler {
 	}
 
 	public ArrayList<String> getData() {
+		// this.updateIDs();
 		String[] tabCols = new String[] { KEY_ROWID, KEY_PERMKEY, KEY_PHONE,
 				KEY_BEGT, KEY_ENDT };
 		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, tabCols, null, null,
 				null, null, null);
 		ArrayList<String> permissionList = new ArrayList<String>();
+		try {
+			int iRow = dbPos.getColumnIndex(KEY_ROWID);
+			// int iPermCode = dbPos.getColumnIndex(KEY_PERMKEY);
+			int iPone = dbPos.getColumnIndex(KEY_PHONE);
+			int iBeginT = dbPos.getColumnIndex(KEY_BEGT);
+			int iEndT = dbPos.getColumnIndex(KEY_ENDT);
 
-		// int iRow = dbPos.getColumnIndex(KEY_ROWID);
-		// int iPermCode = dbPos.getColumnIndex(KEY_PERMKEY);
-		int iPone = dbPos.getColumnIndex(KEY_PHONE);
-		int iBeginT = dbPos.getColumnIndex(KEY_BEGT);
-		int iEndT = dbPos.getColumnIndex(KEY_ENDT);
+			for (dbPos.moveToFirst(); !dbPos.isAfterLast(); dbPos.moveToNext()) {
+				String resultData = "";
+				resultData = resultData + dbPos.getString(iRow) + " "
+						+ dbPos.getString(iPone) + " "
+						+ dbPos.getString(iBeginT) + " "
+						+ dbPos.getString(iEndT);
+				permissionList.add(resultData);
+			}
+		}
 
-		for (dbPos.moveToFirst(); !dbPos.isAfterLast(); dbPos.moveToNext()) {
-			String resultData = "";
-			resultData = resultData + dbPos.getString(iPone) + " "
-					+ dbPos.getString(iBeginT) + " " + dbPos.getString(iEndT);
-			permissionList.add(resultData);
+		catch (Exception e) {
+			Log.v(TAG, e.toString());
+		}
+
+		finally {
+			if (dbPos != null) {
+				dbPos.close();
+			}
 		}
 
 		return permissionList;
@@ -139,6 +159,7 @@ public class DBhandler {
 			String[] resultName = {
 					dbPos.getString(dbPos.getColumnIndex(KEY_BEGT)),
 					dbPos.getString(dbPos.getColumnIndex(KEY_ENDT)) };
+			dbPos.close();
 			return resultName;
 		}
 
@@ -179,24 +200,22 @@ public class DBhandler {
 		}
 
 		dbPos.close();
+
 		return canTrack;
 	}
 
-	public void editEntry(int rowEditID, String editName, String editRate)
-			throws SQLException {
-		Cursor dbPos = permissionSQLDB.query(TABLE_NAME, null, KEY_ROWID + "="
-				+ rowEditID, null, null, null, null, null);
-		if (dbPos != null && dbPos.getCount() > 0) {
-			ContentValues tableData = new ContentValues();
-			tableData.put(KEY_PHONE, editName);
-			tableData.put(KEY_BEGT, editRate);
-			permissionSQLDB.update(TABLE_NAME, tableData, KEY_ROWID + "="
-					+ rowEditID, null);
-		} else {
-			throw new NullPointerException();
-		}
-
-	}
+	/*
+	 * To be completed public void editEntry(int rowEditID, String editName,
+	 * String editRate) throws SQLException { Cursor dbPos =
+	 * permissionSQLDB.query(TABLE_NAME, null, KEY_ROWID + "=" + rowEditID,
+	 * null, null, null, null, null); if (dbPos != null && dbPos.getCount() > 0)
+	 * { ContentValues tableData = new ContentValues(); tableData.put(KEY_PHONE,
+	 * editName); tableData.put(KEY_BEGT, editRate);
+	 * permissionSQLDB.update(TABLE_NAME, tableData, KEY_ROWID + "=" +
+	 * rowEditID, null); } else { throw new NullPointerException(); }
+	 * 
+	 * }
+	 */
 
 	public void deleteEntry(int rowDeleteID) throws SQLException {
 		// TODO Auto-generated method stub
@@ -208,5 +227,14 @@ public class DBhandler {
 		} else {
 			throw new NullPointerException();
 		}
+		// this.updateIDs();
+		dbPos.close();
 	}
+
+	// private void updateIDs() {
+	// Log.v(TAG, "Resetting Sequence ");
+	// permissionSQLDB
+	// .execSQL("UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = '"
+	// + TABLE_NAME + "';");
+	// }
 }

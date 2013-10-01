@@ -6,8 +6,15 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
+    <permission
+        android:name="com.isuru.track_me.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.isuru.track_me.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -22,6 +29,9 @@
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
@@ -47,30 +57,6 @@
         </activity>
 
         <service
-            android:name="com.isuru.track_me.location_tracking_system.PositionNotifier"
-            android:exported="false"
-            android:label="Position Notifier" >
-            <intent-filter>
-                <action android:name="com.isuru.track_me.location_tracking_system.POSITIONNOTIFIER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.isuru.track_me.location_tracking_system.GPSManager"
-            android:exported="false"
-            android:label="GPS Manager" >
-            <intent-filter>
-                <action android:name="com.isuru.track_me.location_tracking_system.GPSMANAGER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.isuru.track_me.sms_handling_system.SMSManager"
-            android:exported="false"
-            android:label="SMS Manager" >
-            <intent-filter>
-                <action android:name="com.isuru.track_me.sms_handling_system.SMSMANAGER" />
-            </intent-filter>
-        </service>
-        <service
             android:name="com.isuru.track_me.permission_handling_system.PermissionManager"
             android:exported="false"
             android:label="Permission Manager" >
@@ -93,6 +79,38 @@
             android:name="com.isuru.track_me.permission_handling_system.DialogActivity"
             android:label="@string/title_activity_dialog" >
         </activity>
+
+        <service
+            android:name="com.isuru.track_me.location_tracking_system.SrvPositioning"
+            android:exported="false"
+            android:label="SrvPositioning" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.location_tracking_system.SRVPOSITIONING" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.isuru.track_me.location_tracking_system.ReceiverPositioningAlarm"
+            android:enabled="true"
+            android:exported="true"
+            android:label="ReceiverPositioningAlarm" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.location_tracking_system.ACTION_REFRESH_SCHEDULE_ALARM" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.isuru.track_me.location_tracking_system.GoogleService"
+            android:exported="false"
+            android:label="Google Service" >
+            <intent-filter>
+                <action android:name="com.isuru.track_me.location_tracking_system.GOOGLESERVICE" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyCzM57RC6LMmweayZXHqZ3TyfM1yMfxyhI" />
     </application>
 
 </manifest>

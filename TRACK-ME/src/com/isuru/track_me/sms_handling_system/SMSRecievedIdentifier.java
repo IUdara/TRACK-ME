@@ -25,8 +25,9 @@ public class SMSRecievedIdentifier extends BroadcastReceiver {
 			Log.i(TAG, "Intent recieved: inside first if");
 			senderInfo = "";
 			messageBody = "";
-			
+
 			Bundle bundle = intent.getExtras();
+			// Intent initialized to PermissionManager class
 			Intent serviceIntent = new Intent(context, PermissionManager.class);
 
 			if (bundle != null) {
@@ -34,12 +35,18 @@ public class SMSRecievedIdentifier extends BroadcastReceiver {
 				final SmsMessage[] messages = new SmsMessage[pdus.length];
 				for (int i = 0; i < pdus.length; i++) {
 					messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-					senderInfo += messages[i].getOriginatingAddress();
-					messageBody += messages[i].getMessageBody().toString();
+					senderInfo += messages[i].getOriginatingAddress(); // Extract
+																		// sender
+																		// phone
+																		// no
+					messageBody += messages[i].getMessageBody().toString(); // Extract
+																			// SMS
+																			// message
 				}
 				if (messages.length > -1) {
 					Log.i(TAG, "Message recieved: " + messageBody + " from "
 							+ senderInfo);
+					// Data to be sent to PermissionManager class
 					serviceIntent.putExtra("sender", senderInfo);
 					serviceIntent.putExtra("message", messageBody);
 					serviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

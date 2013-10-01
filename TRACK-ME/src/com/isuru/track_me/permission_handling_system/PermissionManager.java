@@ -10,7 +10,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.isuru.track_me.location_tracking_system.PositionNotifier;
+import com.isuru.track_me.location_tracking_system.SrvPositioning;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -19,10 +19,12 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 import android.widget.Toast;
@@ -55,8 +57,43 @@ public class PermissionManager extends Service {
 			if (message.startsWith("Track:")) { // a tracking request
 				Log.v(TAG, "Tracking message received");
 				message = message.replace("Track: ", "");
-				if (message != null && message.length() == 5) {
+
+				String[] msg = message.split(" ");
+
+				if (message.length() <= 7 || msg.length == 3) { // need to
+																// modify, if
+																// none to
+																// sender
+																// location
 					Log.v(TAG, "Tracking message OK");
+
+					boolean isPeriodic = false;
+					String dest = "none"; // set to get location of sender
+
+					if (message.length() == 7 || msg.length == 3) {
+						if (msg[1].equals("R")) {
+							isPeriodic = true;
+							message = msg[0];
+							if (msg.length == 3) {
+								dest = msg[2];
+								Log.v(TAG, "Destination : " + dest);
+							}
+						} else if (msg[1].equals("N")) {
+							isPeriodic = false;
+							message = msg[0];
+							if (msg.length == 3) {
+								dest = msg[2];
+								Log.v(TAG, "Destination" + dest);
+							}
+						} else {
+							this.stopSelf();
+						}
+					} else if (message.length() == 5) {
+						isPeriodic = false;
+					} else {
+						this.stopSelf();
+					}
+
 					DateTime curentT = this.getCurrentDate(); // get current
 																// DateTime
 
@@ -65,14 +102,24 @@ public class PermissionManager extends Service {
 					// check whether requester has tracking permission
 					Boolean isPermitted = permissionHandler
 							.checkTrackingValidity(message, phoneNo, curentT);
+					Log.v(TAG, "Code Checking : " + message);
 					permissionHandler.close();
 
 					if (isPermitted) { // when he has permission
 						Log.v(TAG, "You can track");
+
+						SharedPreferences sPref = PreferenceManager
+								.getDefaultSharedPreferences(getApplicationContext());
+						SharedPreferences.Editor editor = sPref.edit();
+						editor.putInt("Frequency", 3);
+						editor.commit();
+
 						// start PositionNotifier service
 						Intent serviceIntent = new Intent(getBaseContext(),
-								PositionNotifier.class);
+								SrvPositioning.class);
 						serviceIntent.putExtra("sender", phoneNo);
+						serviceIntent.putExtra("periodic", isPeriodic);
+						serviceIntent.putExtra("destination", dest);
 						serviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						getBaseContext().startService(serviceIntent);
 					} else {
@@ -83,7 +130,7 @@ public class PermissionManager extends Service {
 				}
 				this.stopSelf();
 
-				return Service.START_STICKY;
+				return Service.START_NOT_STICKY;
 
 			} else if (message.startsWith("Permission:")) { // a permission
 															// request
@@ -105,13 +152,15 @@ public class PermissionManager extends Service {
 						+ " to "
 						+ permission.getPermissionEnd().toString(format);
 				Log.v(TAG, "Message Created");
+
+				// ***** Notification prompts twice *****
 				this.launchNotification(promptingMessage); // launching
 															// notification
 				Log.v(TAG, "Message Prompted");
 			}
 		}
 
-		return Service.START_NOT_STICKY;
+		return Service.START_REDELIVER_INTENT;
 	}
 
 	public String getPhoneNo() {

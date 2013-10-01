@@ -10,5 +10,8 @@
     <string name="tvGranted">Granted Permissions :</string>
     <string name="title_activity_dialog">DialogActivity</string>
     <string name="notificationTitle">TRACK-ME Permission Request</string>
+    <string name="iView">View</string>
+    <string name="iEdit">Edit</string>
+    <string name="iRemove">Remove</string>
 
 </resources>
