@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -34,6 +35,8 @@ import android.widget.ListView;
 public class TrackMe extends Activity {
 
 	private static final String TAG = "TrackMe";
+	private static final int RESULT_SETTINGS = 1;
+
 	private ListView permList;
 	private ArrayList<Integer> permissionIndex;
 	private ArrayList<String> permissionList;
@@ -81,6 +84,62 @@ public class TrackMe extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		switch (item.getItemId()) {
+
+		case R.id.action_settings:
+			Intent i = new Intent(this, SettingsActivity.class);
+			startActivityForResult(i, RESULT_SETTINGS);
+			break;
+
+		case R.id.action_exit:
+			this.finish();
+			break;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	// @Override
+	// protected void onActivityResult(int requestCode, int resultCode, Intent
+	// data) {
+	// super.onActivityResult(requestCode, resultCode, data);
+	//
+	// switch (requestCode) {
+	// case RESULT_SETTINGS:
+	// showSettings();
+	// break;
+	//
+	// }
+	//
+	// }
+	//
+	// private void showSettings() {
+	// SharedPreferences sharedPrefs = PreferenceManager
+	// .getDefaultSharedPreferences(this);
+	//
+	// StringBuilder builder = new StringBuilder();
+	//
+	// builder.append("\n Username: "
+	// + sharedPrefs.getString("prefUsername", "NULL"));
+	//
+	// builder.append("\n Send report:"
+	// + sharedPrefs.getBoolean("prefSendReport", false));
+	//
+	// builder.append("\n Sync Frequency: "
+	// + sharedPrefs.getString("prefSyncFrequency", "NULL"));
+	//
+	// TextView settingsTextView = (TextView)
+	// findViewById(R.id.textUserSettings);
+	//
+	// settingsTextView.setText(builder.toString());
+	// }
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,

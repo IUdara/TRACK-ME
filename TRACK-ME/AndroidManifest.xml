@@ -70,7 +70,7 @@
             android:enabled="true"
             android:exported="true"
             android:label="SMSRecievedIdentifier" >
-            <intent-filter>
+            <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
@@ -111,6 +111,12 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCzM57RC6LMmweayZXHqZ3TyfM1yMfxyhI" />
+        
+        <activity
+            android:name="com.isuru.track_me.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+
     </application>
 
 </manifest>

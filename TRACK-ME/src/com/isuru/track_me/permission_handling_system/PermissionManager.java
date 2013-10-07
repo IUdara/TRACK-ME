@@ -7,6 +7,7 @@ package com.isuru.track_me.permission_handling_system;
 
 import java.util.Calendar;
 import org.joda.time.DateTime;
+import org.joda.time.IllegalFieldValueException;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -31,10 +32,12 @@ import android.widget.Toast;
 
 public class PermissionManager extends Service {
 
+	private static final String TAG = "PermissionManager";
+
 	private Permission permission;
 	private IBinder mBinder = new LocalBinder();
 	private String promptingMessage, phoneNo;
-	private static final String TAG = "PermissionManager";
+	private boolean isTrackEnabled, isPermittingEnabled;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -49,22 +52,32 @@ public class PermissionManager extends Service {
 
 		promptingMessage = "It works";
 
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
+		isTrackEnabled = sPref.getBoolean("prefTracking", false);
+		isPermittingEnabled = sPref.getBoolean("prefPermission", false);
+
 		String message;
+
 		if (intent.getStringExtra("message") != null) {
 			message = intent.getStringExtra("message").trim();
 			phoneNo = intent.getStringExtra("sender");
 
-			if (message.startsWith("Track:")) { // a tracking request
+			if (message.startsWith("Track:") && isTrackEnabled) { // a tracking
+																	// request
 				Log.v(TAG, "Tracking message received");
 				message = message.replace("Track: ", "");
 
 				String[] msg = message.split(" ");
 
-				if (message.length() <= 7 || msg.length == 3) { // need to
-																// modify, if
-																// none to
-																// sender
-																// location
+				if (msg[0].length() == 5
+						&& (message.length() <= 7 || (msg.length == 3 && msg[1]
+								.length() == 1))) { // need
+					// to
+					// modify, if
+					// none to
+					// sender
+					// location
 					Log.v(TAG, "Tracking message OK");
 
 					boolean isPeriodic = false;
@@ -108,8 +121,8 @@ public class PermissionManager extends Service {
 					if (isPermitted) { // when he has permission
 						Log.v(TAG, "You can track");
 
-						SharedPreferences sPref = PreferenceManager
-								.getDefaultSharedPreferences(getApplicationContext());
+						// SharedPreferences sPref = PreferenceManager
+						// .getDefaultSharedPreferences(getApplicationContext());
 						SharedPreferences.Editor editor = sPref.edit();
 						editor.putInt("Frequency", 3);
 						editor.commit();
@@ -132,31 +145,46 @@ public class PermissionManager extends Service {
 
 				return Service.START_NOT_STICKY;
 
-			} else if (message.startsWith("Permission:")) { // a permission
-															// request
+			} else if (message.startsWith("Permission:") && isPermittingEnabled) { // a
+																					// permission
+				// request
+				boolean validPermission = false;
+				boolean validDates = true;
+
 				Log.v(TAG, "Permission message received");
 				message = message.replace("Permission: ", "");
 				// extract requested permissions into a Permission object
-				permission = extractPermission(message, phoneNo);
-				Log.v(TAG, "Permission established");
-				String requester = this.getContactName(getBaseContext(),
-						phoneNo); // get requester's contact name from phone's
-									// contacts
-				Log.v(TAG, "Contact Received");
-				// format requested permissions to display
-				DateTimeFormatter format = DateTimeFormat
-						.forPattern("yyyy-MM-dd hh:mm aa");
-				promptingMessage = requester
-						+ " requests for \ntracking permission \nfrom "
-						+ permission.getPermissionStart().toString(format)
-						+ " to "
-						+ permission.getPermissionEnd().toString(format);
-				Log.v(TAG, "Message Created");
+				try {
+					permission = extractPermission(message, phoneNo);
+					Log.v(TAG, "Permission established");
+					validPermission = this.validatePermission(permission);
+				} catch (IllegalFieldValueException e) {
+					Log.v(TAG, "Invalid Dates");
+					validDates = false;
+				}
+				if (validPermission && validDates) {
+					String requester = this.getContactName(getBaseContext(),
+							phoneNo); // get requester's contact name from
+										// phone's
+										// contacts
+					Log.v(TAG, "Contact Received");
+					// format requested permissions to display
+					DateTimeFormatter format = DateTimeFormat
+							.forPattern("yyyy-MM-dd hh:mm aa");
+					promptingMessage = requester
+							+ " requests for \ntracking permission \nfrom "
+							+ permission.getPermissionStart().toString(format)
+							+ " to "
+							+ permission.getPermissionEnd().toString(format);
+					Log.v(TAG, "Message Created");
 
-				// ***** Notification prompts twice *****
-				this.launchNotification(promptingMessage); // launching
-															// notification
-				Log.v(TAG, "Message Prompted");
+					// ***** Notification prompts twice *****
+					this.launchNotification(promptingMessage); // launching
+																// notification
+					Log.v(TAG, "Message Prompted");
+				} else {
+					Log.v(TAG, "Invalid Permission Request");
+				}
 			}
 		}
 
@@ -180,7 +208,8 @@ public class PermissionManager extends Service {
 	}
 
 	// extract requested permissions into a Permission object
-	private Permission extractPermission(String message, String sender) {
+	private Permission extractPermission(String message, String sender)
+			throws IllegalFieldValueException {
 		String[] permissionList = message.split(" ");
 		String[][] timeDetails = new String[4][3];
 		timeDetails[0] = permissionList[0].split("-");
@@ -197,9 +226,23 @@ public class PermissionManager extends Service {
 				}
 			}
 		}
+
 		Permission permission = new Permission(timeDate, sender);
 
 		return permission;
+	}
+
+	private boolean validatePermission(Permission aPermission) {
+		DateTime beginTime = aPermission.getPermissionStart();
+		DateTime endTime = aPermission.getPermissionEnd();
+		DateTime currentT = PermissionManager.this.getCurrentDate();
+		boolean isValid = false;
+
+		if (currentT.isBefore(beginTime) && beginTime.isBefore(endTime)) {
+			isValid = true;
+		}
+
+		return isValid;
 	}
 
 	// return current DateTime

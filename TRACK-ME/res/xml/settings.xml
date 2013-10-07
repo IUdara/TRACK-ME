@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_change_setting" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="prefAllEnable"
+            android:summary="@string/pref_enable_all_smry"
+            android:title="@string/pref_enable_all" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="prefAllEnable"
+            android:key="prefTracking"
+            android:summary="@string/pref_enable_tracking_smry"
+            android:title="@string/pref_enable_tracking" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="prefAllEnable"
+            android:key="prefPermission"
+            android:summary="@string/pref_enable_permission_smry"
+            android:title="@string/pref_enable_permission" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_user_profile" >
+        <Preference
+            android:key="prefPwd"
+            android:summary="@string/pref_change_pwd_smry"
+            android:title="@string/pref_change_pwd" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -2,16 +2,32 @@
 <resources>
 
     <string name="app_name">TRACK-ME</string>
-    <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="tvPwd">Enter Your Password :</string>
     <string name="etPwd">Password</string>
     <string name="bLogin">Log In</string>
     <string name="tvGranted">Granted Permissions :</string>
-    <string name="title_activity_dialog">DialogActivity</string>
+    <string name="tvCurrent">Enter Current Password :</string>
+    <string name="tvNew">Enter New Password :</string>
+    <string name="tvConfirm">Confirm New Password :</string>
+    <string name="title_activity_dialog">Dialog Activity</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="notificationTitle">TRACK-ME Permission Request</string>
     <string name="iView">View</string>
     <string name="iEdit">Edit</string>
     <string name="iRemove">Remove</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_exit">Exit</string>
+    <string name="pref_enable_all">Application Enabled</string>
+    <string name="pref_enable_all_smry">Allow to run app in background</string>
+    <string name="pref_enable_tracking">Tracking Enabled</string>
+    <string name="pref_enable_tracking_smry">Can track with valid permission</string>
+    <string name="pref_enable_permission">Permitting Enabled</string>
+    <string name="pref_enable_permission_smry">Can request for tracking permission</string>
+    <string name="pref_change_pwd">Change Password</string>
+    <string name="pref_change_pwd_smry">Enter new password</string>
+    <string name="pref_change_setting">Enable/Disable Services</string>
+    <string name="pref_user_profile">Change User Settings</string>
+    <string name="prompt_conf_pass">Confirm Password</string>
 
 </resources>

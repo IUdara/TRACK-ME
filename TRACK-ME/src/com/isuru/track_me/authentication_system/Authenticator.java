@@ -11,13 +11,18 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -35,7 +40,8 @@ public class Authenticator extends Activity {
 	/**
 	 * The default email to populate the email field with.
 	 */
-	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
+	// public static final String EXTRA_EMAIL =
+	// "com.example.android.authenticatordemo.extra.EMAIL";
 
 	// private static final String TAG = "Authenticator";
 
@@ -47,11 +53,11 @@ public class Authenticator extends Activity {
 	private String uNamePass;
 
 	// Values for email and password at the time of the login attempt.
-	private String mEmail;
+	private String mUsername;
 	private String mPassword;
 
 	// UI references.
-	private EditText mEmailView;
+	private EditText mUsernameView;
 	private EditText mPasswordView;
 	private View mLoginFormView;
 	private View mLoginStatusView;
@@ -65,9 +71,9 @@ public class Authenticator extends Activity {
 
 		// Set up the login form.
 
-		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
-		mEmailView = (EditText) findViewById(R.id.email);
-		mEmailView.setText(mEmail);
+		// mUsername = getIntent().getStringExtra(EXTRA_EMAIL);
+		mUsernameView = (EditText) findViewById(R.id.username);
+		mUsernameView.setText(mUsername);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 		mPasswordView
@@ -114,11 +120,11 @@ public class Authenticator extends Activity {
 		}
 
 		// Reset errors.
-		mEmailView.setError(null);
+		mUsernameView.setError(null);
 		mPasswordView.setError(null);
 
 		// Store values at the time of the login attempt.
-		mEmail = mEmailView.getText().toString();
+		mUsername = mUsernameView.getText().toString();
 		mPassword = mPasswordView.getText().toString();
 
 		boolean cancel = false;
@@ -129,20 +135,20 @@ public class Authenticator extends Activity {
 			mPasswordView.setError(getString(R.string.error_field_required));
 			focusView = mPasswordView;
 			cancel = true;
-		} else if (mPassword.length() < 4) {
+		} else if (mPassword.length() < 5) {
 			mPasswordView.setError(getString(R.string.error_invalid_password));
 			focusView = mPasswordView;
 			cancel = true;
 		}
 
-		// Check for a valid email address.
-		if (TextUtils.isEmpty(mEmail)) {
-			mEmailView.setError(getString(R.string.error_field_required));
-			focusView = mEmailView;
+		// Check for a valid user name.
+		if (TextUtils.isEmpty(mUsername)) {
+			mUsernameView.setError(getString(R.string.error_field_required));
+			focusView = mUsernameView;
 			cancel = true;
-		} else if (!mEmail.contains("@")) {
-			mEmailView.setError(getString(R.string.error_invalid_email));
-			focusView = mEmailView;
+		} else if (mUsername.length() < 5) {
+			mUsernameView.setError(getString(R.string.error_invalid_username));
+			focusView = mUsernameView;
 			cancel = true;
 		}
 
@@ -153,10 +159,20 @@ public class Authenticator extends Activity {
 		} else {
 			// Show a progress spinner, and kick off a background task to
 			// perform the user login attempt.
-			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
-			showProgress(true);
-			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
+
+			SharedPreferences sPrefs = PreferenceManager
+					.getDefaultSharedPreferences(getApplicationContext());
+			String aNamePass = sPrefs.getString("AuthData", "Empty");
+
+			if (aNamePass.equals("Empty")) {
+				Authenticator.this.showDialog(mPassword);
+			} else {
+				mLoginStatusMessageView
+						.setText(R.string.login_progress_signing_in);
+				showProgress(true);
+				mAuthTask = new UserLoginTask();
+				mAuthTask.execute((Void) null);
+			}
 		}
 	}
 
@@ -211,29 +227,37 @@ public class Authenticator extends Activity {
 
 			// Log.v(TAG, "Authenticating");
 
-			SharedPreferences sPref = getPreferences(MODE_PRIVATE);
+			SharedPreferences sPref = PreferenceManager
+					.getDefaultSharedPreferences(getApplicationContext());
 			String encNamePass = sPref.getString("AuthData", "Empty");
 
 			// Log.v(TAG, "Access Encrypted Password");
 
 			if (encNamePass.equals("Empty")) {
 				// Log.v(TAG, "1) First Time");
-				uNamePass = mEmail.concat(":" + mPassword);
+				// if (Authenticator.this.showDialog(mPassword)) {
+
+				uNamePass = mUsername.concat(":" + mPassword);
 				// Log.v(TAG, "2) First Time");
 				try {
 					// Log.v(TAG, "3) First Time");
 					encNamePass = SimpleCrypto.encrypt("gajk@390#6gf",
 							uNamePass);
 					// Log.v(TAG, "4) First Time");
-					SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+					SharedPreferences sharedPreferences = PreferenceManager
+							.getDefaultSharedPreferences(getApplicationContext());
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString("AuthData", encNamePass);
+					editor.putString("UserName", mUsername);
 					editor.commit();
 					return true;
 				} catch (Exception e) {
 					e.printStackTrace();
 					return false;
 				}
+				// } else {
+				// return false;
+				// }
 			} else {
 				// Log.v(TAG, "Not First Time");
 
@@ -241,7 +265,7 @@ public class Authenticator extends Activity {
 					uNamePass = SimpleCrypto.decrypt("gajk@390#6gf",
 							encNamePass);
 					String[] pieces = uNamePass.split(":");
-					if (pieces[0].equals(mEmail)) {
+					if (pieces[0].equals(mUsername)) {
 						// Account exists, return true if the password matches.
 						return pieces[1].equals(mPassword);
 					}
@@ -267,7 +291,7 @@ public class Authenticator extends Activity {
 				getBaseContext().startActivity(intent);
 				finish();
 			} else {
-				mEmailView.setError(getString(R.string.error_invalid_email));
+				mUsernameView.setError(getString(R.string.error_invalid_email));
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
@@ -279,5 +303,79 @@ public class Authenticator extends Activity {
 			mAuthTask = null;
 			showProgress(false);
 		}
+	}
+
+	private void showDialog(final String password) {
+
+		LayoutInflater factory = (LayoutInflater) this
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		final View textEntryView = factory.inflate(R.layout.confirm_dialog,
+				null);
+		AlertDialog.Builder alert = new AlertDialog.Builder(
+				new ContextThemeWrapper(this, android.R.style.Theme_Dialog));
+
+		alert.setTitle("Confirm Password");
+		// Set an EditText view to get user input
+		alert.setView(textEntryView);
+
+		final EditText confirmPwd = (EditText) textEntryView
+				.findViewById(R.id.etConf);
+
+		alert.setPositiveButton("Confirm",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+
+					}
+				});
+
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						dialog.cancel();
+					}
+				});
+
+		final AlertDialog pwdChanger = alert.create();
+		pwdChanger.show();
+
+		pwdChanger.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+
+						Boolean closeDialog = false;
+						View focusView = null;
+						String confirmation = confirmPwd.getText().toString();
+
+						if (confirmation.length() == 0) {
+							confirmPwd
+									.setError(getString(R.string.error_field_required));
+							focusView = confirmPwd;
+						} else if (!confirmation.equals(password)) {
+
+							confirmPwd
+									.setError(getString(R.string.error_mismatch_password2));
+							focusView = confirmPwd;
+						} else {
+
+							closeDialog = true;
+
+							mLoginStatusMessageView
+									.setText(R.string.login_progress_signing_in);
+							showProgress(true);
+							mAuthTask = new UserLoginTask();
+							mAuthTask.execute((Void) null);
+							// Log.v(TAG, "Null Password");
+						}
+
+						if (!closeDialog) {
+							focusView.requestFocus();
+						}
+
+						if (closeDialog) {
+							pwdChanger.dismiss();
+						}
+					}
+				});
 	}
 }

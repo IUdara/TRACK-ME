@@ -12,6 +12,7 @@ package com.isuru.track_me.permission_handling_system;
 //Constructs an instance from datetime field values using ISOChronology in the specified time zone.
 
 import org.joda.time.DateTime;
+import org.joda.time.IllegalFieldValueException;
 import org.joda.time.Period;
 
 public class Permission {
@@ -22,11 +23,11 @@ public class Permission {
 	private String owner;
 	private String permissionCode;
 
-	public Permission(int[][] dateTime, String owner) {
+	public Permission(int[][] dateTime, String owner) throws IllegalFieldValueException{
 		super();
 		this.permissionStart = new DateTime(dateTime[0][0], dateTime[0][1],
-				dateTime[0][2], dateTime[1][0], dateTime[1][1]); 
-		
+				dateTime[0][2], dateTime[1][0], dateTime[1][1]);
+
 		// construct new DataTime using new
 		this.permissionEnd = new DateTime(dateTime[2][0], dateTime[2][1],
 				dateTime[2][2], dateTime[3][0], dateTime[3][1]);
@@ -74,7 +75,7 @@ public class Permission {
 	public Period getUpdatePeriod() {
 		return updatePeriod;
 	}
-	
+
 	public String getPermissionCode() {
 		return permissionCode;
 	}
@@ -82,7 +83,6 @@ public class Permission {
 	public void setPermissionCode(String permissionCode) {
 		this.permissionCode = permissionCode;
 	}
-
 
 	public Boolean getIsPeriodic() {
 		Boolean isPeriodic;

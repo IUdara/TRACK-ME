@@ -5,7 +5,9 @@ import com.isuru.track_me.permission_handling_system.PermissionManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
@@ -14,14 +16,19 @@ public class SMSRecievedIdentifier extends BroadcastReceiver {
 	private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
 	private static final String TAG = "SMSBroadcastReceiver";
 
-	String senderInfo, messageBody;
+	private String senderInfo, messageBody;
+	private boolean isAppEnabled;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// TODO Auto-generated method stub
 		Log.i(TAG, "Intent recieved: " + intent.getAction());
 
-		if (intent.getAction().equals(SMS_RECEIVED)) {
+		SharedPreferences sPref = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		isAppEnabled = sPref.getBoolean("prefAllEnable", false);
+
+		if (intent.getAction().equals(SMS_RECEIVED) && isAppEnabled) {
 			Log.i(TAG, "Intent recieved: inside first if");
 			senderInfo = "";
 			messageBody = "";
@@ -46,6 +53,12 @@ public class SMSRecievedIdentifier extends BroadcastReceiver {
 				if (messages.length > -1) {
 					Log.i(TAG, "Message recieved: " + messageBody + " from "
 							+ senderInfo);
+					// Avoid message going to inbox
+					if (messageBody.startsWith("Track:")
+							|| messageBody.startsWith("Permission:")) {
+						this.abortBroadcast();
+					}
+
 					// Data to be sent to PermissionManager class
 					serviceIntent.putExtra("sender", senderInfo);
 					serviceIntent.putExtra("message", messageBody);
